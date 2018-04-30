@@ -43,7 +43,7 @@ class UusiTieto extends Component {
                     <p>nimi: <input type='text' 
                                     value={this.state.newName} 
                                     onChange={this.uusiNimi} /></p>
-                    <p>numero: <input type='number'
+                    <p>numero: <input type='text'
                                       value={this.state.newNumber} 
                                       onChange={this.uusiNumero} /></p>    
                     <button type='submit'>lisää</button>
