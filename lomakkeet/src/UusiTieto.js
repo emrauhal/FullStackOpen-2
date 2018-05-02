@@ -26,12 +26,25 @@ class UusiTieto extends Component {
         const names = this.props.data.persons.map((hlo) => hlo.name)
 
         // tarkistetaan, löytyykö syötetty nimi jo tiedoista
-        if (names.includes(this.state.newName)) {
-            alert('Nimi lisätty jo!') // löytyy: virheilmoitus
+        if (names.includes(this.state.newName)) { 
+
+            // nimi löytyy: kysytään käyttäjältä, haluaako päivittää numeron
+            let option = window.confirm(this.state.newName + 
+                ' on jo luettelossa, korvataanko vanha numero?')
+
+            if (option === true) { // jos käyttäjä klikkaa ok
+                // etsitään nimen perusteella olemassaoleva olio jo sen id
+                const obj = this.props.data.persons
+                    .filter((hlo) => hlo.name === this.state.newName)
+                // päivitetään puhelinnumero äsken haetun id:n perusteella   
+                this.props.paivita(obj[0].id, this.state)
+            } // else: käyttäjä klikkaa peruuta: ei lisätä eikä muokata
+
         } else {
-            this.props.uusi(this.state) // ei löydy: lisätään uusi tieto
+            // nimeä ei löydy: lisätään uusi tieto
+            this.props.uusi(this.state)
         }
-        // tyhjennetään lomakekentät
+        // tyhjennetään lopuksi lomakekentät
         this.setState({newName: '', newNumber: ''})
     }
 

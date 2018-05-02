@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import service from './services/persons';
 import Filtteri from './Filtteri';
 import UusiTieto from './UusiTieto';
 import './index.css';
@@ -12,29 +12,78 @@ class App extends Component {
     }
 
     componentWillMount() {
-        console.log('willmount')
-        axios
-            .get('http://localhost:3001/persons')
+        this.haeJaPaivita()
+    }
+
+    // luettelon sisällön päivittäminen:
+    // täytyy hakea uudestaan aina, kun jokin muutos tapahtuu
+    haeJaPaivita() {
+        service
+            .getAll()
             .then(function (response) {
-                console.log('axios')
                 this.setState({persons: response.data})
             }.bind(this))
     }
 
     // käsitellään uuden tiedon lisääminen lomakkeella
     uusiTietoLomakkeelta = (data) => {
-        const copy = this.state.persons
-        copy.push({name: data.newName, number: data.newNumber})  
-        this.setState({persons: copy})   
+        // luodaan lomakkeen tietojen perusteella olio
+        const personObject = {
+            name: data.newName,
+            number: data.newNumber,
+            id: '' // autogeneroituu
+        }
+        service
+            .create(personObject)
+            .then(function (response) {
+
+                if (response.status === 201) {
+                    this.haeJaPaivita()
+                } else {
+                    throw new Error(response.statusText)
+                }    
+            }.bind(this))
+    }
+
+    // puhelinnumeron päivittäminen
+    paivitaNumero = (id, data) => {
+        // luodaan olio, jonka nimi ja id löytyvät jo listalta
+        const personObject = {
+            name: data.newName,
+            number: data.newNumber,
+            id: id
+        }
+        service
+            .update(id, personObject)
+            .then(function (response) {
+                if (response.status === 200) {
+                    this.haeJaPaivita()
+                } else {
+                    throw new Error(response.statusText)
+                }
+            }.bind(this))
+    }
+
+    // poistetaan yksittäinen puhelinnumerotieto id:n perusteella
+    poistaTieto = (hlo) => {
+        service
+            .remove(hlo)
+            .then(function (response) {
+                if (response.status === 200) {
+                    this.haeJaPaivita()
+                } else {
+                    throw new Error(response.statusText)
+                }
+            }.bind(this))
     }
 
     render() {
-
         return (
             <div className='App'>
                 <h2>Puhelinluettelo</h2>
-                <UusiTieto data={this.state} uusi={this.uusiTietoLomakkeelta} />
-                <Filtteri data={this.state} />   
+                <UusiTieto data={this.state} uusi={this.uusiTietoLomakkeelta} 
+                            paivita={this.paivitaNumero}/>
+                <Filtteri data={this.state} poista={this.poistaTieto} />   
             </div>
         )
     }

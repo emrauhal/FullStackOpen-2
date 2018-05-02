@@ -19,7 +19,8 @@ class Filtteri extends Component {
                     Rajaa näytettäviä: 
                     <input value={this.state.filter} onChange={this.uusiFilter} />
                 </p>
-                <Luettelo data={this.props.data} filter={this.state.filter} />
+                <Luettelo data={this.props.data} filter={this.state.filter}
+                        poista={this.props.poista} />
             </div>    
         )
     }

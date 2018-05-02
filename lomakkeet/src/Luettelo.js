@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import Tieto from './Tieto';
 
 class Luettelo extends Component {
-    
+
     render() {
         // filtteröidään data hakukentän ehdon perusteella
         // case-sensitiivinen!
@@ -9,7 +10,8 @@ class Luettelo extends Component {
         const numerot = this.props.data.persons
             .filter((hlo) => hlo.name.includes(
                 this.props.filter) === true)
-            .map((hlo) => <Tieto key={hlo.name} hlo={hlo} />
+            .map((hlo) => <Tieto key={hlo.id} hlo={hlo} 
+                            poista={this.props.poista}/>
         )
 
         return (
@@ -29,13 +31,3 @@ class Luettelo extends Component {
     }
 }
 export default Luettelo
-
-// apupalikka yksittäisen nimi-numero-parin esittämiseen
-const Tieto = (props) => {
-    return (
-        <tr>
-            <td>{props.hlo.name}</td>
-            <td>{props.hlo.number}</td>
-        </tr>    
-    )
-}
