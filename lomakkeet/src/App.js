@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import service from './services/persons';
-import Filtteri from './Filtteri';
-import UusiTieto from './UusiTieto';
-import './index.css';
+import Filtteri from './components/Filtteri';
+import UusiTieto from './components/UusiTieto';
+import { Notification, ErrorNotification } from './components/notifications';
 
 class App extends Component {
 
     constructor(props) {
         super(props)
-        this.state = { persons: [] }
+        this.state = { persons: [], info: '', error: '' }
     }
 
     componentWillMount() {
@@ -21,8 +21,18 @@ class App extends Component {
         service
             .getAll()
             .then(function (response) {
-                this.setState({persons: response.data})
+                if (response.status === 200) {
+                    this.setState({persons: response.data})
+                } else {
+                    throw new Error('Tietojen päivittäminen epäonnistui!')
+                } 
             }.bind(this))
+            .catch(error => {
+                this.setState({error: 'Tietojen päivittäminen ei onnistunut!'})
+                setTimeout(() => {
+                    this.setState({ error: null })
+                }, 5000)
+            })
     }
 
     // käsitellään uuden tiedon lisääminen lomakkeella
@@ -38,11 +48,27 @@ class App extends Component {
             .then(function (response) {
 
                 if (response.status === 201) {
+                    // asetetaan käyttäjälle näytettävä ilmoitusviesti (vihreä)
+                    this.setState({info: 'Henkilön ' + data.newName +
+                                    ' lisääminen onnistui!'})
+                    // asetetaan viesti näkymään 5 sekunnin ajan                
+                    setTimeout(() => {
+                        this.setState({ info: null })
+                    }, 3000)
                     this.haeJaPaivita()
                 } else {
-                    throw new Error(response.statusText)
+                    // heitetään virheilmoitus
+                    throw new Error('Uuden henkilön lisääminen ei onnistunut!')
                 }    
             }.bind(this))
+            // käsitellään mahdolliset virheet
+            .catch(error => {
+                // asetetaan käyttäjälle näytettävä virheilmoitus (punainen)
+                this.setState({error: 'Uuden henkilön lisääminen ei onnistunut!'})
+                setTimeout(() => {
+                    this.setState({ error: null })
+                }, 5000)
+            })
     }
 
     // puhelinnumeron päivittäminen
@@ -57,11 +83,28 @@ class App extends Component {
             .update(id, personObject)
             .then(function (response) {
                 if (response.status === 200) {
+                    this.setState({info: 'Henkilön ' + data.newName +
+                                    ' puhelinnumeron päivittäminen onnistui!'})
+                    setTimeout(() => {
+                        this.setState({ info: null })
+                    }, 3000)
                     this.haeJaPaivita()
                 } else {
-                    throw new Error(response.statusText)
+                    throw new Error('Puhelinnumeron päivittäminen ei onnistunut!')
                 }
             }.bind(this))
+            .catch(error => {
+                this.setState({error: 'Puhelinnumeron päivittäminen ei onnistunut.' + 
+                                    ' Yhteystieto saattaa olla jo poistettu luettelosta.'})
+                // mikäli henkilö jo poistettu esim. toisella selaimella, voitaisiin se
+                // poistaa myös käytettävän selaimen listasta
+                // this.setState({persons: this.state.persons
+                //      .filter((hlo) => hlo.id !== id)})
+                // VIRHEILMOITUS KUITENKIN YLEISKÄYTTÖINEN, JOTEN SE VOI AIHEUTUA MUUSTAKIN                 
+                setTimeout(() => {
+                    this.setState({ error: null })
+                }, 5000)
+            })
     }
 
     // poistetaan yksittäinen puhelinnumerotieto id:n perusteella
@@ -70,17 +113,53 @@ class App extends Component {
             .remove(hlo)
             .then(function (response) {
                 if (response.status === 200) {
+                    this.setState({info: 'Henkilön poistaminen onnistui!'})
+                    setTimeout(() => {
+                        this.setState({ info: null })
+                    }, 3000)
                     this.haeJaPaivita()
                 } else {
-                    throw new Error(response.statusText)
+                    throw new Error('Poistaminen ei onnistunut!')
                 }
             }.bind(this))
+            .catch(error => {
+                this.setState({error: 'Poistaminen ei onnistunut!'})
+                setTimeout(() => {
+                    this.setState({ error: null })
+                }, 5000)
+            })
+
     }
 
     render() {
+        // virheen ilmetessä tulostetaan punainen virheilmoitus
+        if (this.state.error !== '') {
+            return (
+                <div className='App'>
+                    <h2>Puhelinluettelo</h2>
+                    <ErrorNotification message={this.state.error} /> 
+                    <UusiTieto data={this.state} uusi={this.uusiTietoLomakkeelta} 
+                                paivita={this.paivitaNumero}/>
+                    <Filtteri data={this.state} poista={this.poistaTieto} />   
+                </div>
+            )
+        }
+        // onnistuneen suorituksen jälkeen tulostetaan vihreä ilmotus tapahtuneesta
+        if (this.state.info !== '') {
+            return (
+                <div className='App'>
+                    <h2>Puhelinluettelo</h2>
+                    <Notification message={this.state.info} />   
+                    <UusiTieto data={this.state} uusi={this.uusiTietoLomakkeelta} 
+                                paivita={this.paivitaNumero}/>
+                    <Filtteri data={this.state} poista={this.poistaTieto} />   
+                </div>
+            )
+        }
+        // muuten: ei tulostetan ilmoituksia
         return (
             <div className='App'>
-                <h2>Puhelinluettelo</h2>
+                <h2>Puhelinluettelo</h2>  
                 <UusiTieto data={this.state} uusi={this.uusiTietoLomakkeelta} 
                             paivita={this.paivitaNumero}/>
                 <Filtteri data={this.state} poista={this.poistaTieto} />   

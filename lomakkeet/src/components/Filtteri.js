@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Luettelo from './Luettelo';
-import './index.css';
 
 class Filtteri extends Component {
     constructor(props) {

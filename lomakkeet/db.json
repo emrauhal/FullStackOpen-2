@@ -1,16 +1,6 @@
 {
   "persons": [
     {
-      "name": "Nalle Puh",
-      "number": "1133",
-      "id": 1
-    },
-    {
-      "name": "Nalle Pöh",
-      "number": "7777",
-      "id": 2
-    },
-    {
       "name": "Nalle Pah",
       "number": "7667",
       "id": 3
@@ -21,14 +11,14 @@
       "id": 4
     },
     {
-      "name": "Nalle Äh",
-      "number": "7008",
-      "id": 5
-    },
-    {
       "name": "Nalle Köh",
       "number": "6788",
       "id": 6
+    },
+    {
+      "name": "Nalle Aah",
+      "number": "8900",
+      "id": 9
     }
   ]
 }
